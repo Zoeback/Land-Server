@@ -1,0 +1,30 @@
+{
+  "format_version": 2,
+  "header": {
+    "description": "[object Object]",
+    "min_engine_version": [
+      1,
+      16,
+      20
+    ],
+    "name": "Land-Resources-Pack-21-Bedrock-Edition",
+    "uuid": "8a1d5689-9c34-4517-3ba3-483fc1d16383",
+    "version": [
+      0,
+      0,
+      1
+    ]
+  },
+  "modules": [
+    {
+      "description": "[object Object]",
+      "type": "resources",
+      "uuid": "6d54ea17-5cd6-477a-4059-bcdc34945928",
+      "version": [
+        0,
+        0,
+        1
+      ]
+    }
+  ]
+}

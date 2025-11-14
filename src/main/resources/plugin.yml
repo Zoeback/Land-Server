@@ -1,0 +1,156 @@
+name: LandOtherPlugin
+version: '1.0.0'
+main: com.landother.landotherplugin.LandOtherPlugin
+api-version: '1.16'
+description: 一个Minecraft Paper插件，实现公用物品领取功能
+author: LandOther
+website: https://github.com/LandOther/LandOtherPlugin
+
+commands:
+  publicitems:
+    description: 打开公用物品领取界面
+    usage: /publicitems 或 /pi
+    aliases: [pi]
+    permission-message: "&c你没有权限使用这个命令!"
+  
+  kit:
+    description: 打开指定kit礼包界面
+    usage: /kit <name>
+    permission-message: "&c你没有权限使用这个命令!"
+  
+  landother:
+    description: LandOther插件主命令
+    usage: /landother <reload|stats|reset|additem|createkit>
+    aliases: [lo]
+    permission: landother.admin
+    permission-message: "&c你没有权限使用这个命令!"
+    tab-complete: true
+
+permissions:
+  landother.*:
+    description: LandOther插件的所有权限
+    default: op
+    children:
+      landother.publicitems: true
+      landother.admin: true
+      landother.use: true
+      landother.kit.*: true
+  
+  landother.use:
+    description: 使用基本功能的权限
+    default: true
+  
+  landother.publicitems:
+    description: 使用公用物品领取功能的权限
+    default: true
+  
+  landother.kit.*:
+    description: 使用所有kit的权限
+    default: true
+  
+  landother.kit.example:
+    description: 使用示例kit的权限（自动生成）
+    default: true
+  
+  landother.admin:
+    description: 插件管理权限
+    default: op
+  
+  landother.enchantlimit:
+    description: 允许使用/landother enchantlimit命令设置附魔等级限制
+    default: op
+
+# 插件配置
+inventory:
+  title: "&6&l公用物品领取"
+  size: 27
+
+# 公用物品配置
+items:
+  - material: DIAMOND_SWORD
+    amount: 1
+    name: "&b&l传说之剑"
+  
+  - material: DIAMOND_PICKAXE
+    amount: 1
+    name: "&e&l矿工之镐"
+  
+  - material: DIAMOND_AXE
+    amount: 1
+    name: "&a&l伐木斧"
+  
+  - material: DIAMOND_SHOVEL
+    amount: 1
+    name: "&d&l挖掘铲"
+  
+  - material: DIAMOND_HOE
+    amount: 1
+    name: "&c&l农夫之锄"
+  
+  - material: DIAMOND_HELMET
+    amount: 1
+    name: "&9&l钻石头盔"
+  
+  - material: DIAMOND_CHESTPLATE
+    amount: 1
+    name: "&9&l钻石胸甲"
+  
+  - material: DIAMOND_LEGGINGS
+    amount: 1
+    name: "&9&l钻石护腿"
+  
+  - material: DIAMOND_BOOTS
+    amount: 1
+    name: "&9&l钻石靴子"
+  
+  - material: ENCHANTED_GOLDEN_APPLE
+    amount: 5
+    name: "&6&l附魔金苹果"
+  
+  - material: EMERALD
+    amount: 64
+    name: "&2&l绿宝石"
+  
+  - material: DIAMOND
+    amount: 32
+    name: "&b&l钻石"
+
+# 消息配置
+messages:
+  already-claimed: "&c你已经领取过物品了，每人只能领取一次!"
+  item-claimed: "&c这个物品已经被其他玩家领取了!"
+  claim-success: "&a成功领取物品: "
+  no-permission: "&c你没有权限使用这个命令!"
+  inventory-title: "&6&l公用物品领取"
+  
+# 功能开关
+features:
+  # 是否启用物品领取限制（每人只能领取一次）
+  enable-claim-limit: true
+  
+  # 是否启用物品唯一性（每个物品只能被领取一次）
+  enable-item-uniqueness: true
+  
+  # 是否保存玩家领取记录到文件
+  enable-data-persistence: true
+  
+  # 是否启用调试模式
+  debug-mode: false
+
+# 附魔等级限制配置
+enchantment-limits:
+  # 是否启用附魔等级限制
+  enabled: true
+  
+  # 默认最高附魔等级（对所有玩家生效）
+  default-max-level: 255
+  
+  # 特定附魔的等级限制（优先级高于默认限制）
+  specific-enchantments:
+    # PROTECTION_ENVIRONMENTAL: 10
+    # SHARPNESS: 20
+  
+  # 特定玩家的附魔等级限制（优先级最高）
+  player-limits: {}
+    # Notch: 100
+    # Steve: 50

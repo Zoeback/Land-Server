@@ -1,0 +1,87 @@
+# LandOtherPlugin 配置文件
+# 公用物品领取系统配置
+
+# 库存设置
+inventory:
+  # 库存标题 (支持颜色代码 &)
+  title: "&6&l公用物品领取"
+  # 库存大小 (必须是9的倍数，最大54)
+  size: 27
+
+# 物品列表
+# 每个物品可以设置以下属性:
+# - material: 物品材质 (必须)
+# - amount: 数量 (可选, 默认为1)
+# - name: 物品显示名称 (可选, 支持颜色代码 &)
+items:
+  - material: DIAMOND_SWORD
+    amount: 1
+    name: "&b&l传说之剑"
+  
+  - material: DIAMOND_CHESTPLATE
+    amount: 1
+    name: "&e&l守护胸甲"
+  
+  - material: GOLDEN_APPLE
+    amount: 5
+    name: "&c&l生命果"
+  
+  - material: EMERALD
+    amount: 10
+    name: "&a&l财富宝石"
+  
+  - material: EXPERIENCE_BOTTLE
+    amount: 20
+    name: "&d&l经验瓶"
+  
+  - material: NETHERITE_INGOT
+    amount: 2
+    name: "&7&l下界合金"
+  
+  - material: ENCHANTED_BOOK
+    amount: 3
+    name: "&9&l魔法书"
+  
+  - material: TOTEM_OF_UNDYING
+    amount: 1
+    name: "&6&l不死图腾"
+  
+  - material: DIAMOND
+    amount: 15
+    name: "&b钻石"
+
+# 消息设置
+messages:
+  # 玩家已经领取过物品的提示
+  already_claimed: "&c你已经领取过物品了，每人只能领取一次!"
+  # 物品已被其他玩家领取的提示
+  item_already_claimed: "&c这个物品已经被其他玩家领取了!"
+  # 成功领取物品的提示
+  claim_success: "&a成功领取物品: "
+  # 只有玩家才能使用命令的提示
+  player_only: "&c只有玩家才能使用这个命令!"
+
+# 权限设置
+permissions:
+  # 使用公用物品领取命令的权限
+  use_command: "landother.use"
+  # 重置玩家领取状态的权限 (管理员功能)
+  reset_player: "landother.reset"
+  # 查看插件信息的权限
+  info: "landother.info"
+
+# 功能开关
+features:
+  # 是否启用物品唯一性 (每个物品只能被一个玩家领取)
+  unique_items: true
+  # 是否启用个人限制 (每个玩家只能领取一次)
+  personal_limit: true
+  # 是否记录领取日志
+  log_claims: true
+
+# 数据存储设置
+data_storage:
+  # 玩家数据保存间隔 (秒)
+  save_interval: 300
+  # 是否自动保存玩家数据
+  auto_save: true

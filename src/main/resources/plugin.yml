@@ -142,10 +142,13 @@ enchantment-limits:
   # 是否启用附魔等级限制
   enabled: true
   
-  # 默认最高附魔等级（对所有玩家生效）
+  # 是否限制到原版最高附魔等级（true时，每个附魔的等级限制为其原版最大值）
+  limit-to-vanilla-max-level: false
+  
+  # 默认最高附魔等级（对所有玩家生效，当limit-to-vanilla-max-level为false时生效）
   default-max-level: 255
   
-  # 特定附魔的等级限制（优先级高于默认限制）
+  # 特定附魔的等级限制（优先级高于默认限制，当limit-to-vanilla-max-level为false时生效）
   specific-enchantments:
     # PROTECTION_ENVIRONMENTAL: 10
     # SHARPNESS: 20

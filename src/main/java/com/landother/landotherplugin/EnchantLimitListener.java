@@ -101,7 +101,12 @@ public class EnchantLimitListener implements Listener {
                 enchantments.put(entry.getKey(), entry.getValue());
             }
 
-            player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+
+            if (plugin.getConfig().getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+                player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为原版最高等级");
+            } else {
+                player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+            }
         }
     }
 
@@ -177,7 +182,12 @@ public class EnchantLimitListener implements Listener {
 
                 anvil.setItem(2, newResult);
 
-                player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+
+                if (plugin.getConfig().getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+                    player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为原版最高等级");
+                } else {
+                    player.sendMessage(ChatColor.YELLOW + "附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+                }
             }
         }
     }
@@ -226,7 +236,12 @@ public class EnchantLimitListener implements Listener {
             }
 
             item.setItemMeta(meta);
-            player.sendMessage(ChatColor.YELLOW + "物品附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+
+            if (plugin.getConfig().getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+                player.sendMessage(ChatColor.YELLOW + "物品附魔等级已被限制为原版最高等级");
+            } else {
+                player.sendMessage(ChatColor.YELLOW + "物品附魔等级已被限制为最高 " + getMaxEnchantLevel(player, null) + " 级");
+            }
         }
 
         return modified;
@@ -286,7 +301,14 @@ public class EnchantLimitListener implements Listener {
             for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
                 Enchantment enchant = entry.getKey();
                 int level = entry.getValue();
-                int maxLevel = plugin.getConfig().getInt("enchantment-limits.default-max-level", 255);
+                int maxLevel;
+
+
+                if (plugin.getConfig().getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+                    maxLevel = VanillaEnchantMaxLevel.getVanillaMaxLevel(enchant);
+                } else {
+                    maxLevel = plugin.getConfig().getInt("enchantment-limits.default-max-level", 255);
+                }
 
                 if (level > maxLevel) {
                     newEnchantments.put(enchant, maxLevel);
@@ -362,11 +384,30 @@ public class EnchantLimitListener implements Listener {
              if (enchantArgs.length >= 4) {
                  try {
                      int level = Integer.parseInt(enchantArgs[3]);
-                     int maxLevel = getMaxEnchantLevel(player, null);
-                     if (level > maxLevel) {
-                         event.setCancelled(true);
-                         player.sendMessage(ChatColor.RED + "附魔等级超过限制！最高允许 " + maxLevel + " 级");
-                         return;
+
+
+                     if (plugin.getConfig().getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+
+                         if (enchantArgs.length >= 3) {
+                             String enchantName = enchantArgs[2].toUpperCase();
+                             Enchantment enchantment = Enchantment.getByName(enchantName);
+                             if (enchantment != null) {
+                                 int vanillaMaxLevel = VanillaEnchantMaxLevel.getVanillaMaxLevel(enchantment);
+                                 if (level > vanillaMaxLevel) {
+                                     event.setCancelled(true);
+                                     player.sendMessage(ChatColor.RED + "附魔等级超过原版最高等级！该附魔原版最高为 " + vanillaMaxLevel + " 级");
+                                     return;
+                                 }
+                             }
+                         }
+                     } else {
+
+                         int maxLevel = getMaxEnchantLevel(player, null);
+                         if (level > maxLevel) {
+                             event.setCancelled(true);
+                             player.sendMessage(ChatColor.RED + "附魔等级超过限制！最高允许 " + maxLevel + " 级");
+                             return;
+                         }
                      }
                  } catch (NumberFormatException e) {
 
@@ -421,11 +462,20 @@ public class EnchantLimitListener implements Listener {
         FileConfiguration config = plugin.getConfig();
 
 
+        if (config.getBoolean("enchantment-limits.limit-to-vanilla-max-level", false)) {
+            if (enchantment != null) {
+                return VanillaEnchantMaxLevel.getVanillaMaxLevel(enchantment);
+            } else {
+
+                return 5;
+            }
+        }
+
+
         String playerName = player.getName();
         if (config.contains("enchantment-limits.player-limits." + playerName)) {
             return config.getInt("enchantment-limits.player-limits." + playerName, 255);
         }
-
 
         if (enchantment != null) {
             String enchantKey = enchantment.getKey().getKey().toUpperCase();
@@ -433,7 +483,6 @@ public class EnchantLimitListener implements Listener {
                 return config.getInt("enchantment-limits.specific-enchantments." + enchantKey, 255);
             }
         }
-
 
         return config.getInt("enchantment-limits.default-max-level", 255);
     }

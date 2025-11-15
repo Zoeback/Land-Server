@@ -244,6 +244,7 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
 
             if (args.length == 0) {
                 player.sendMessage(ChatColor.GOLD + "=== LandOtherPlugin 管理命令 ===");
+                player.sendMessage(ChatColor.YELLOW + "/landother help - 显示此帮助信息");
                 player.sendMessage(ChatColor.YELLOW + "/landother reload - 重载配置");
                 player.sendMessage(ChatColor.YELLOW + "/landother reload kit - 重载kit配置");
                 player.sendMessage(ChatColor.YELLOW + "/landother stats - 查看统计信息");
@@ -251,7 +252,13 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                 player.sendMessage(ChatColor.YELLOW + "/landother reset kit <玩家> [kit名称] - 重置玩家kit状态");
                 player.sendMessage(ChatColor.YELLOW + "/landother additem - 添加手上的物品到公用列表");
                 player.sendMessage(ChatColor.YELLOW + "/landother createkit <name> - 创建新的kit");
-                player.sendMessage(ChatColor.YELLOW + "/landother enchantlimit <玩家/all> [等级] - 设置玩家附魔等级限制");
+                player.sendMessage(ChatColor.YELLOW + "/landother deletekit <name> - 删除指定的kit");
+                player.sendMessage(ChatColor.YELLOW + "/landother listkits - 列出所有可用的kit");
+                player.sendMessage(ChatColor.YELLOW + "/landother enchantlimit <玩家/all> [等级/vanillaMax/reset] - 设置玩家附魔等级限制");
+                player.sendMessage(ChatColor.GOLD + "=== 玩家命令 ===");
+                player.sendMessage(ChatColor.YELLOW + "/publicitems 或 /pi - 打开公用物品领取界面");
+                player.sendMessage(ChatColor.YELLOW + "/kit - 打开kit领取界面");
+                player.sendMessage(ChatColor.YELLOW + "/landother 或 /lo - 打开管理界面（需要权限）");
                 return true;
             }
 
@@ -453,6 +460,41 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                 return true;
             }
 
+            if (args[0].equalsIgnoreCase("deletekit") && args.length >= 2) {
+                String kitName = args[1].toLowerCase();
+
+                if (kitManager != null) {
+                    File kitFile = new File(getDataFolder(), "kit/" + kitName + ".yml");
+                    if (kitFile.exists() && kitFile.delete()) {
+                        kitManager.reloadKits();
+                        player.sendMessage(ChatColor.GREEN + "成功删除kit: " + kitName);
+                    } else {
+                        player.sendMessage(ChatColor.RED + "删除kit失败，可能是kit不存在或文件错误");
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "Kit管理器未初始化");
+                }
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("listkits")) {
+                if (kitManager != null) {
+                    Set<String> kitNames = kitManager.getKitNames();
+                    if (kitNames.isEmpty()) {
+                        player.sendMessage(ChatColor.YELLOW + "当前没有任何kit");
+                    } else {
+                        player.sendMessage(ChatColor.GOLD + "=== 可用Kit列表 ===");
+                        for (String kitName : kitNames) {
+                            player.sendMessage(ChatColor.YELLOW + "- " + kitName);
+                        }
+                        player.sendMessage(ChatColor.GRAY + "共 " + kitNames.size() + " 个kit");
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "Kit管理器未初始化");
+                }
+                return true;
+            }
+
             if (args[0].equalsIgnoreCase("enchantlimit")) {
 
                 if (!sender.hasPermission("landother.enchantlimit")) {
@@ -466,11 +508,59 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                 }
 
                 if (args.length < 2) {
-                    sender.sendMessage("§c用法: /landother enchantlimit <玩家/all> [等级]");
+                    sender.sendMessage("§c用法: /landother enchantlimit <玩家/all> [等级/vanillaMax/reset]");
                     return true;
                 }
 
                 String target = args[1];
+
+
+                if (args.length >= 3 && args[2].equalsIgnoreCase("vanillaMax")) {
+                    getConfig().set("enchantment-limits.limit-to-vanilla-max-level", true);
+                    saveConfig();
+                    enchantLimitListener.loadConfig();
+
+                    if (target.equalsIgnoreCase("all")) {
+                        sender.sendMessage("§a已为§e所有玩家§a启用§e限制到原版最高附魔等级§a功能");
+                        for (Player p : getServer().getOnlinePlayers()) {
+                            p.sendMessage("§e[系统] §a附魔等级限制已更新为§e原版最高等级");
+                        }
+                    } else {
+                        sender.sendMessage("§a已为玩家§e" + target + "§a启用§e限制到原版最高附魔等级§a功能");
+                        Player targetPlayer = getServer().getPlayer(target);
+                        if (targetPlayer != null && targetPlayer.isOnline()) {
+                            targetPlayer.sendMessage("§e[系统] §a你的附魔等级限制已更新为§e原版最高等级");
+                        }
+                    }
+                    return true;
+                }
+
+
+                if (args.length >= 3 && args[2].equalsIgnoreCase("reset")) {
+                    getConfig().set("enchantment-limits.limit-to-vanilla-max-level", false);
+                    getConfig().set("enchantment-limits.player-limits", new HashMap<>());
+                    saveConfig();
+                    enchantLimitListener.loadConfig();
+
+                    if (target.equalsIgnoreCase("all")) {
+                        sender.sendMessage("§a已为§e所有玩家§a§e重置§a附魔等级限制功能");
+                        sender.sendMessage("§a已关闭限制到原版最高附魔等级功能");
+                        sender.sendMessage("§a已清空所有玩家的个人附魔等级限制");
+                        for (Player p : getServer().getOnlinePlayers()) {
+                            p.sendMessage("§e[系统] §a附魔等级限制已§e重置§a，恢复为默认设置");
+                        }
+                    } else {
+                        sender.sendMessage("§a已为玩家§e" + target + "§a§e重置§a附魔等级限制功能");
+                        sender.sendMessage("§a已关闭限制到原版最高附魔等级功能");
+                        sender.sendMessage("§a已清空该玩家的个人附魔等级限制");
+                        Player targetPlayer = getServer().getPlayer(target);
+                        if (targetPlayer != null && targetPlayer.isOnline()) {
+                            targetPlayer.sendMessage("§e[系统] §a你的附魔等级限制已§e重置§a，恢复为默认设置");
+                        }
+                    }
+                    return true;
+                }
+
                 int maxLevel = 255;
 
                 if (args.length >= 3) {
@@ -685,6 +775,14 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                         }
                     }
                 }
+                if ("<name>".startsWith(args[1].toLowerCase())) {
+                    completions.add("<name>");
+                }
+            } else if (args[0].equalsIgnoreCase("createkit")) {
+
+                if ("<name>".startsWith(args[1].toLowerCase())) {
+                    completions.add("<name>");
+                }
             } else if (args[0].equalsIgnoreCase("enchantlimit")) {
 
                 completions.add("all");
@@ -704,8 +802,11 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                         completions.add(onlinePlayer.getName());
                     }
                 }
-            } else if (args[0].equalsIgnoreCase("enchantlimit")) {
+            } else if (args[0].equalsIgnoreCase("enchantlimit") &&
+                      !args[1].equalsIgnoreCase("vanillaMax") && !args[1].equalsIgnoreCase("reset")) {
 
+                completions.add("vanillaMax");
+                completions.add("reset");
                 String[] levels = {"1", "5", "10", "50", "100", "255", "1000", "10000"};
                 for (String level : levels) {
                     if (level.startsWith(args[2])) {

@@ -178,14 +178,24 @@ public class ItemManager {
 
 
     private void saveClaimedItems() {
-        plugin.getConfig().set("claimed_items", new HashMap<>(claimedItems));
-        plugin.getConfig().set("player_claimed_items", new HashMap<>(playerClaimedItems));
+        Map<String, String> claimedItemsStr = new HashMap<>();
+        for (Map.Entry<String, UUID> entry : claimedItems.entrySet()) {
+            claimedItemsStr.put(entry.getKey(), entry.getValue().toString());
+        }
+        
+        Map<String, List<String>> playerClaimedItemsStr = new HashMap<>();
+        for (Map.Entry<UUID, List<String>> entry : playerClaimedItems.entrySet()) {
+            playerClaimedItemsStr.put(entry.getKey().toString(), entry.getValue());
+        }
+        
+        plugin.getConfig().set("claimed_items", claimedItemsStr);
+        plugin.getConfig().set("player_claimed_items", playerClaimedItemsStr);
         plugin.saveConfig();
     }
 
 
     @SuppressWarnings("unchecked")
-    private void loadClaimedItems() {
+    public void loadClaimedItems() {
         if (plugin.getConfig().contains("claimed_items")) {
             Map<String, Object> claimedItemsData = plugin.getConfig().getConfigurationSection("claimed_items").getValues(false);
             for (Map.Entry<String, Object> entry : claimedItemsData.entrySet()) {

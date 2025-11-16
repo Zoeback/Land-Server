@@ -276,6 +276,9 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                     reloadConfig();
                     loadConfig();
                     createPublicInventory();
+                    if (itemManager != null) {
+                        itemManager.loadClaimedItems();
+                    }
                     if (kitManager != null) {
                         kitManager.reloadKits();
                     }
@@ -346,8 +349,10 @@ public class LandOtherPlugin extends JavaPlugin implements Listener, TabComplete
                     return true;
                 }
 
-                boolean success = playerData.resetPlayerClaimStatus(targetPlayer.getUniqueId());
+                UUID playerUuid = targetPlayer.getUniqueId();
+                boolean success = playerData.resetPlayerClaimStatus(playerUuid);
                 if (success) {
+                    itemManager.resetPlayerClaims(playerUuid);
                     player.sendMessage(ChatColor.GREEN + "已重置玩家 " + playerName + " 的领取状态");
                     targetPlayer.sendMessage(ChatColor.GREEN + "你的领取状态已被管理员重置");
                 } else {
